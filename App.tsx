@@ -99,6 +99,11 @@ const MealCard = ({ meal }: { meal: Meal }) => {
           <div className="p-8 space-y-4">
             <span className="bg-[#C5A059] text-white text-[9px] font-black px-3 py-1 rounded-full uppercase">Opção 2</span>
             <p className="text-slate-800 text-sm leading-relaxed font-bold whitespace-pre-line">{meal.elaborate.description}</p>
+            <div className="flex flex-wrap gap-2">
+              {meal.elaborate.substitutions.map((sub, i) => (
+                <button key={i} onClick={() => setSelectedSub(sub)} className="px-3 py-1 bg-white border border-stone-200 rounded-lg text-[10px] font-black uppercase no-print">Trocando {sub.item}</button>
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -131,7 +136,7 @@ const ProgressionGuide = ({ macros, userData }: { macros: CalculatedMacros, user
   );
 };
 
-// --- TELAS ---
+// --- APP PRINCIPAL ---
 
 const App = () => {
   const [step, setStep] = useState(0);
@@ -149,12 +154,12 @@ const App = () => {
     };
   }, [userData]);
 
-  // Remove o loader do HTML assim que o React montar
+  // Esconde o overlay de carregamento quando o componente monta
   useEffect(() => {
-    const loader = document.getElementById('loading-overlay');
-    if (loader) {
-      loader.style.opacity = '0';
-      setTimeout(() => loader.style.display = 'none', 500);
+    const overlay = document.getElementById('loading-overlay');
+    if (overlay) {
+      overlay.style.opacity = '0';
+      setTimeout(() => overlay.style.display = 'none', 500);
     }
   }, []);
 
@@ -168,7 +173,7 @@ const App = () => {
       setDietPlan(plan);
       setStep(1);
     } catch (e) {
-      alert("Erro na conexão. Verifique sua chave API.");
+      alert("Erro ao conectar com o Nutricionista Digital. Tente novamente.");
     } finally {
       setLoading(false);
     }
@@ -183,7 +188,7 @@ const App = () => {
 
       <main className="max-w-4xl mx-auto">
         {step === 0 && (
-          <div className="bg-white rounded-[2.5rem] shadow-2xl p-10 max-w-lg mx-auto border border-stone-100 relative overflow-hidden text-slate-950">
+          <div className="bg-white rounded-[2.5rem] shadow-2xl p-10 max-w-lg mx-auto border border-stone-100 relative overflow-hidden text-slate-950 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div className="absolute top-0 left-0 w-full h-2 bg-[#C5A059]"></div>
             <h2 className="text-3xl font-black uppercase text-center mb-10 tracking-tight">Protocolo Bulking</h2>
             <div className="space-y-6">
@@ -197,8 +202,8 @@ const App = () => {
                   <input type="number" value={userData.height} onChange={e=>setUserData({...userData, height: +e.target.value})} className="w-full p-4 bg-stone-50 rounded-2xl border-2 border-stone-100 outline-none font-black text-slate-800 focus:border-[#C5A059] transition-colors" />
                 </div>
               </div>
-              <button onClick={handleStart} disabled={loading} className="w-full py-6 bg-slate-950 text-[#C5A059] font-black uppercase tracking-widest rounded-2xl hover:bg-[#C5A059] hover:text-white transition-all shadow-xl">
-                {loading ? "Calculando Protocolo..." : "Gerar Cardápio de Bulking"}
+              <button onClick={handleStart} disabled={loading} className="w-full py-6 bg-slate-950 text-[#C5A059] font-black uppercase tracking-widest rounded-2xl hover:bg-[#C5A059] hover:text-white transition-all shadow-xl disabled:opacity-50">
+                {loading ? "Processando..." : "Gerar Cardápio"}
               </button>
             </div>
           </div>
@@ -225,21 +230,24 @@ const App = () => {
 
             <div className="mt-16 bg-white p-10 rounded-[3rem] shadow-2xl border border-stone-100 text-slate-950 flex flex-col items-center gap-8 no-print">
               <div className="text-center space-y-2">
-                <h4 className="font-black text-2xl uppercase tracking-tighter">Mindset de Atleta</h4>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest leading-relaxed max-w-md mx-auto">Siga o plano com disciplina. O resultado virá na constância dos macros.</p>
+                <h4 className="font-black text-2xl uppercase tracking-tighter">Pronto para a Evolução?</h4>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest leading-relaxed max-w-md mx-auto">Salve este PDF e comece hoje mesmo.</p>
               </div>
-              <button onClick={() => window.print()} className="px-10 py-5 bg-slate-950 text-[#C5A059] rounded-2xl font-black uppercase tracking-[0.3em] hover:bg-[#C5A059] hover:text-white transition-all shadow-2xl flex items-center space-x-4">
-                <span>Imprimir Planejamento (PDF)</span>
+              <button onClick={() => window.print()} className="px-10 py-5 bg-slate-950 text-[#C5A059] rounded-2xl font-black uppercase tracking-[0.3em] hover:bg-[#C5A059] hover:text-white transition-all shadow-2xl">
+                Imprimir Planejamento
               </button>
             </div>
           </div>
         )}
       </main>
-      <footer className="mt-20 text-center text-[10px] font-black text-slate-600 uppercase tracking-widest no-print">Team Ferres &copy; 2024 - Protocolo Bulking</footer>
+      <footer className="mt-20 text-center text-[10px] font-black text-slate-600 uppercase tracking-widest no-print">Team Ferres &copy; 2024</footer>
     </div>
   );
 };
 
-// Montagem do App
-const root = createRoot(document.getElementById('root')!);
-root.render(<App />);
+// Renderização final
+const container = document.getElementById('root');
+if (container) {
+  const root = createRoot(container);
+  root.render(<App />);
+}

@@ -12,6 +12,7 @@
         background-color: #020617;
         color: white;
         font-family: system-ui, -apple-system, sans-serif;
+        overflow-x: hidden;
       }
       #error-log {
         display: none;
@@ -69,14 +70,17 @@
 </script>
 
     <script>
-      window.onerror = function(msg, url, line) {
+      // Captura erros de carregamento e sintaxe
+      window.onerror = function(msg, url, line, col, error) {
         const overlay = document.getElementById('loading-overlay');
         if (overlay) overlay.style.display = 'none';
         const log = document.getElementById('error-log');
         log.style.display = 'block';
-        log.textContent = "❌ ERRO CRÍTICO:\n" + msg + "\n\nVerifique se o arquivo App.tsx existe na raiz.";
+        log.textContent = "❌ ERRO DETECTADO:\n" + msg + "\n\nLocal: " + url + "\nLinha: " + line;
+        console.error(error);
         return false;
       };
+      // Define process.env para evitar erros de referência
       window.process = { env: { API_KEY: "" } };
     </script>
   </head>
@@ -84,11 +88,15 @@
     <div id="error-log"></div>
     <div id="loading-overlay">
       <div class="spinner"></div>
-      <p style="color: #C5A059; font-weight: 900; margin-top: 20px; letter-spacing: 0.3em; font-size: 10px; text-transform: uppercase;">Aguarde o Protocolo...</p>
+      <p style="color: #C5A059; font-weight: 900; margin-top: 20px; letter-spacing: 0.3em; font-size: 10px; text-transform: uppercase;">Iniciando Protocolo...</p>
     </div>
     <div id="root"></div>
 
-    <!-- O Babel processa o App.tsx e o script de montagem -->
-    <script type="text/babel" data-presets="react,typescript" src="App.tsx"></script>
+    <!-- 
+      IMPORTANTE: 
+      data-type="module" faz o Babel gerar um script type="module"
+      Isso resolve o erro "Cannot use import statement outside a module"
+    -->
+    <script type="text/babel" data-presets="react,typescript" data-type="module" src="App.tsx"></script>
   </body>
 </html>
